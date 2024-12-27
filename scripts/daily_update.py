@@ -76,10 +76,16 @@ def upsert_products(df):
     and upserts each row into the 'products' table in the PostgreSQL database
     specified by DATABASE_URL.
     """
+    # Get the database URL from environment variables
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
-        raise ValueError("Missing DATABASE_URL environment variable!")
+        raise ValueError("DATABASE_URL environment variable is not set!")
 
+    # Ensure the URL uses the correct dialect prefix
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    # Create the SQLAlchemy engine
     engine = create_engine(db_url)
 
     # Upsert SQL with ON CONFLICT
