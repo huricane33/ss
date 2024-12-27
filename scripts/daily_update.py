@@ -31,12 +31,12 @@ def get_drive_service():
 def download_latest_file(folder_id, destination):
     """
     Fetches the newest file in the specified Google Drive folder,
-    downloads it, and saves it to 'destination'.
+    downloads it, and saves it to 'destination' (e.g., "daily_products.xlsx").
     Returns the local file path if successful, or None if the folder is empty.
     """
     service = get_drive_service()
 
-    # List newest file in the folder
+    # List the newest file in the folder
     results = service.files().list(
         q=f"'{folder_id}' in parents",
         orderBy="createdTime desc",
@@ -68,7 +68,11 @@ def download_latest_file(folder_id, destination):
 def upsert_products(df):
     """
     Takes a DataFrame with columns:
-      product_id, product_name, vendor_name, category, barcode
+      - product_id
+      - product_name
+      - vendor_name
+      - category
+      - barcode
     and upserts each row into the 'products' table in the PostgreSQL database
     specified by DATABASE_URL.
     """
@@ -103,31 +107,32 @@ def upsert_products(df):
 def main():
     """
     Main script logic:
-    1. Get FOLDER_ID from environment.
-    2. Download the newest file from Google Drive to 'daily_products.xlsx'.
-    3. Read the file from row 9 onward (skiprows=8).
-    4. Rename columns: (C->barcode, D->product_id, E->product_name, I->category, L->vendor_name).
-    5. Upsert into DB.
+    1. Read FOLDER_ID from environment.
+    2. Download the newest file from Google Drive, saving as 'daily_products.xlsx'.
+    3. Read the .xlsx file.
+    4. Rename columns to match the screenshot structure.
+    5. Upsert into the DB.
     """
     folder_id = os.getenv("FOLDER_ID")
     if not folder_id:
         raise ValueError("Missing FOLDER_ID environment variable!")
 
+    # Adjust the destination file to an XLSX file
     local_file = download_latest_file(folder_id, "daily_products.xlsx")
     if not local_file:
         print("No file downloaded. Exiting.")
         return
 
-    # Read Excel skipping first 8 rows so that row 9 is the header
-    df = pd.read_excel(local_file, skiprows=8)
+    # Read the XLSX file using the openpyxl engine
+    df = pd.read_excel(local_file, engine="openpyxl")
 
-    # Rename columns
+    # Rename columns to match the screenshot
     column_map = {
-        "C": "barcode",
-        "D": "product_id",
-        "E": "product_name",
-        "I": "category",
-        "L": "vendor_name"
+        "BARCODE": "barcode",
+        "ITEM ID": "product_id",
+        "nama item": "product_name",
+        "category": "category",
+        "vendor_name": "vendor_name"
     }
     df.rename(columns=column_map, inplace=True)
 
