@@ -1,3 +1,2 @@
-web: gunicorn app:app  # Flask app managing routes
+web: streamlit run streamlit_dashboard.py --server.port=$PORT --server.address=0.0.0.0
 streamlit: streamlit run streamlit_dashboard.py --server.port=$PORT --server.address=0.0.0.0
-dash: python dash_dashboard.py  # Dash dashboard
