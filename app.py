@@ -61,7 +61,7 @@ def streamlit_dashboard():
     if not session.get("logged_in"):
         return redirect(url_for("login"))
     # Redirect to the Streamlit dyno URL
-    return redirect("https://sales-stock-dashboard-8395a052347b.herokuapp.com/streamlit")
+    return redirect('http://localhost:8501', code=302)
 
 
 if __name__ == "__main__":
