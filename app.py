@@ -60,8 +60,8 @@ def dash_dashboard():
 def streamlit_dashboard():
     if not session.get("logged_in"):
         return redirect(url_for("login"))
-    os.system("streamlit run streamlit_dashboard.py")  # Launch Streamlit
-    return "Streamlit dashboard is running!"
+    # Redirect to the Streamlit dyno URL
+    return redirect("https://sales-stock-dashboard-8395a052347b.herokuapp.com/streamlit")
 
 
 if __name__ == "__main__":
